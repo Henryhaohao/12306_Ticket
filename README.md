@@ -1,7 +1,7 @@
 12306购票程序 ![enter image description here](logo.png)
 ===========================
-****
-
+![](https://img.shields.io/badge/Python-3.6.3-green.svg) ![](https://img.shields.io/badge/requests-2.18.4-green.svg) ![](https://img.shields.io/badge/matplotlib-2.2.2-green.svg) 
+### 12306官网 - https://kyfw.12306.cn/otn/leftTicket/init 
 |Author|:sunglasses:Henryhaohao:sunglasses:|
 |---|---
 |Email|:hearts:1073064953@qq.com:hearts:
