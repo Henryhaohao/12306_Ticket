@@ -1,4 +1,4 @@
-12306购票程序 ![enter image description here](logo.png)
+12306购票程序 ![enter image description here](Pic/logo.png)
 ===========================
 ![](https://img.shields.io/badge/Python-3.6.3-green.svg) ![](https://img.shields.io/badge/requests-2.18.4-green.svg) ![](https://img.shields.io/badge/matplotlib-2.2.2-green.svg) 
 ### 12306官网 - https://kyfw.12306.cn/otn/leftTicket/init 
@@ -25,3 +25,12 @@ pip3 install -r requirements.txt
 ## :dolphin:目前版本
 > - 手动打码版本 (Spiders目录下的12306.py)
 > - 自动打码版本 (Spiders目录下的12306_captcha.py)
+## :dolphin:运行截图
+> - 订票 (Order_Ticket)
+![enter image description here](Pic/order.png)
+
+> - 取消订单 (Cancel_Order)
+![enter image description here](Pic/cancelorder.png)
+
+> - 退票 (Refund_Ticket)
+![enter image description here](Pic/refund.png)

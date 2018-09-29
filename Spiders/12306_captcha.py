@@ -771,18 +771,21 @@ def select():
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
         order()
+        exit()
     if func == '2':
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
         cancelorder()
+        exit()
     if func == '3':
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
-        order()
+        cancelticket()
+        exit()
     else:
         print('输入有误,请重新输入...')
         print('*' * 69)
-        cancelticket()
+        select()
 
 
 if __name__ == '__main__':
