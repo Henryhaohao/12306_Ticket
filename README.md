@@ -26,11 +26,11 @@ pip3 install -r requirements.txt
 > - 手动打码版本 (Spiders目录下的12306.py)
 > - 自动打码版本 (Spiders目录下的12306_captcha.py)
 ## :dolphin:运行截图
-> - 订票 (Order_Ticket)
+> - **订票 (Order_Ticket)**<br><br>
 ![enter image description here](Pic/order.png)
 
-> - 取消订单 (Cancel_Order)
+> - **取消订单** (Cancel_Order)<br><br>
 ![enter image description here](Pic/cancelorder.png)
 
-> - 退票 (Refund_Ticket)
+> - **退票** (Refund_Ticket)<br><br>
 ![enter image description here](Pic/refund.png)
