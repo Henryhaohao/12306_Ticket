@@ -9,9 +9,9 @@
     
 ****
 ## :dolphin:声明
-软件均仅用于学习交流，请勿用于任何商业用途！感谢大家！
+### 软件均仅用于学习交流，请勿用于任何商业用途！感谢大家！
 ## :dolphin:介绍
-该项目为[12306购票](https://kyfw.12306.cn/otn/leftTicket/init)的命令行形式。目前实现的功能有:
+### 该项目为[12306购票](https://kyfw.12306.cn/otn/leftTicket/init)的命令行形式。目前实现的功能有:
 - 余票查询 (Query_Ticket)
 - 购票 (Order_Ticket)
 - 取消订单 (Cancel_Order)
