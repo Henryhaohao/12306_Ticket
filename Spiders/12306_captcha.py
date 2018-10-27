@@ -11,6 +11,9 @@ from urllib import parse
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
+import urllib3
+
+urllib3.disable_warnings() #不显示警告信息
 ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
 
@@ -31,7 +34,7 @@ class Leftquery(object):
 
     def station_name(self, station):
         '''获取车站简拼'''
-        html = requests.get(self.station_url).text
+        html = requests.get(self.station_url, verify=False).text
         result = html.split('@')[1:]
         dict = {}
         for i in result:
@@ -44,10 +47,10 @@ class Leftquery(object):
         '''余票查询'''
         fromstation = self.station_name(from_station)
         tostation = self.station_name(to_station)
-        url = 'https://kyfw.12306.cn/otn/leftTicket/queryA?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
+        url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
         try:
-            html = requests.get(url, headers=self.headers).json()
+            html = requests.get(url, headers=self.headers, verify=False).json()
             result = html['data']['result']
             if result == []:
                 print('很抱歉,没有查到符合当前条件的列车!')
@@ -106,7 +109,7 @@ class Login(object):
     def showimg(self):
         '''显示验证码图片'''
         global req
-        html_pic = req.get(self.url_pic, headers=self.headers).content
+        html_pic = req.get(self.url_pic, headers=self.headers, verify=False).content
         open('pic.jpg', 'wb').write(html_pic)
         img = mpimg.imread('pic.jpg')
         plt.imshow(img)
@@ -137,7 +140,7 @@ class Login(object):
             'rand': 'sjrand'
         }
         global req
-        html_check = req.post(self.url_check, data=form_check, headers=self.headers).json()
+        html_check = req.post(self.url_check, data=form_check, headers=self.headers, verify=False).json()
         print(html_check)
         if html_check['result_code'] == '4':
             print('验证码校验成功!')
@@ -153,7 +156,7 @@ class Login(object):
             'appid': 'otn'
         }
         global req
-        html_login = req.post(self.url_login, data=form_login, headers=self.headers).json()
+        html_login = req.post(self.url_login, data=form_login, headers=self.headers, verify=False).json()
         print(html_login)
         if html_login['result_code'] == 0:
             print('恭喜您,登录成功!')
@@ -193,7 +196,7 @@ class Order(object):
             # '_json_att':''
         }
         global req
-        html_uam = req.post(self.url_uam, data=form, headers=self.head_1).json()
+        html_uam = req.post(self.url_uam, data=form, headers=self.head_1, verify=False).json()
         print(html_uam)
         if html_uam['result_code'] == 0:
             print('恭喜您,uam验证成功!')
@@ -207,7 +210,7 @@ class Order(object):
             'tk': tk,
             # '_json_att':''
         }
-        html_uamclient = req.post(self.url_uamclient, data=form, headers=self.head_1).json()
+        html_uamclient = req.post(self.url_uamclient, data=form, headers=self.head_1, verify=False).json()
         print(html_uamclient)
         if html_uamclient['result_code'] == 0:
             print('恭喜您,uamclient验证成功!')
@@ -231,7 +234,7 @@ class Order(object):
             'undefined': ''  # 固定的
         }
         global req
-        html_order = req.post(self.url_order, data=form, headers=self.head_1).json()
+        html_order = req.post(self.url_order, data=form, headers=self.head_1, verify=False).json()
         print(html_order)
         if html_order['status'] == True:
             print('恭喜您,提交订单成功!')
@@ -245,7 +248,7 @@ class Order(object):
             '_json_att': ''
         }
         global req
-        html_token = req.post(self.url_token, data=form, headers=self.head_1).text
+        html_token = req.post(self.url_token, data=form, headers=self.head_1, verify=False).text
         token = re.findall(r"var globalRepeatSubmitToken = '(.*?)';", html_token)[0]
         leftTicket = re.findall(r"'leftTicketStr':'(.*?)',", html_token)[0]
         key_check_isChange = re.findall(r"'key_check_isChange':'(.*?)',", html_token)[0]
@@ -287,7 +290,7 @@ class Order(object):
             'REPEAT_SUBMIT_TOKEN': token
         }
         global req
-        html_pass = req.post(self.url_pass, data=form, headers=self.head_1).json()
+        html_pass = req.post(self.url_pass, data=form, headers=self.head_1, verify=False).json()
         passengers = html_pass['data']['normal_passengers']
         print('\n')
         print('乘客信息列表:')
@@ -374,7 +377,7 @@ class Order(object):
             'REPEAT_SUBMIT_TOKEN': token
         }
         global req
-        html_checkorder = req.post(self.url_checkorder, data=form, headers=self.head_2).json()
+        html_checkorder = req.post(self.url_checkorder, data=form, headers=self.head_2, verify=False).json()
         print(html_checkorder)
         if html_checkorder['status'] == True:
             print('检查订单信息成功!')
@@ -401,7 +404,7 @@ class Order(object):
             'REPEAT_SUBMIT_TOKEN': token
         }
         global req
-        html_count = req.post(self.url_count, data=form, headers=self.head_2).json()
+        html_count = req.post(self.url_count, data=form, headers=self.head_2, verify=False).json()
         print(html_count)
         if html_count['status'] == True:
             print('查看余票数量成功!')
@@ -440,7 +443,7 @@ class Order(object):
             'REPEAT_SUBMIT_TOKEN': token
         }
         global req
-        html_confirm = req.post(self.url_confirm, data=form, headers=self.head_2).json()
+        html_confirm = req.post(self.url_confirm, data=form, headers=self.head_2, verify=False).json()
         print(html_confirm)
         if html_confirm['status'] == True:
             print('确认购票成功!')
@@ -470,7 +473,7 @@ class Cancelorder(Login, Order):
         }
         global req
 
-        html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel).json()
+        html_orderinfo = req.post(self.url_ordeinfo, data=form, headers=self.head_cancel, verify=False).json()
         if html_orderinfo['status'] == True:
             print('查询未完成订单成功!')
             try:
@@ -501,7 +504,7 @@ class Cancelorder(Login, Order):
                 '_json_att': ''
             }
             global req
-            html_cancel = req.post(self.url_cancel, data=form, headers=self.head_cancel).json()
+            html_cancel = req.post(self.url_cancel, data=form, headers=self.head_cancel, verify=False).json()
             print(html_cancel)
             if html_cancel['status'] == True:
                 print('取消订单成功!')
@@ -540,7 +543,7 @@ class Cancelticket(Login, Order):
             'sequeue_train_name': train_info,  # 填乘客姓名('xxx')或车次号('K1561')或订单号('EF159626'); 也可以不填('')
         }
         global req
-        html_query = req.post(self.url_query, headers=self.head_query, data=form).json()
+        html_query = req.post(self.url_query, headers=self.head_query, data=form, verify=False).json()
         if html_query['data']['order_total_number'] == '':
             print('抱歉,没有查到相关订单~')
             exit()
@@ -633,7 +636,7 @@ class Cancelticket(Login, Order):
             '_json_att': ''
         }
         global req
-        html_return = req.post(self.url_return, headers=self.head_query, data=form_return).json()
+        html_return = req.post(self.url_return, headers=self.head_query, data=form_return, verify=False).json()
         print(html_return)
         if html_return['status'] == True:
             print('提交退票信息成功!')
@@ -650,7 +653,7 @@ class Cancelticket(Login, Order):
         form_end = {
             '_json_att': ''
         }
-        html_end = req.post(self.url_end, data=form_end, headers=self.head_query).json()
+        html_end = req.post(self.url_end, data=form_end, headers=self.head_query, verify=False).json()
         print(html_end)
         if html_return['status'] == True:
             print('确认退票成功!')
@@ -671,7 +674,7 @@ def pass_captcha():
         'Referer': 'https://kyfw.12306.cn/otn/login/init',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
     }
-    html_pic = req.get(url_pic, headers=headers).content
+    html_pic = req.get(url_pic, headers=headers, verify=False).content
     open('pic.jpg', 'wb').write(html_pic)
     files = {
         'file': open('pic.jpg', 'rb')
@@ -681,10 +684,13 @@ def pass_captcha():
         'Upgrade-Insecure-Requests': '1',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
     }
-    res = requests.post(url_captcha, files=files, headers=headers).text
-    result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
-    return result
-
+    try:
+        res = requests.post(url_captcha, files=files, headers=headers, verify=False).text
+        result = re.search('<B>(.*?)</B>', res).group(1).replace(' ', ',')
+        return result
+    except:
+        print('Sorry!验证码自动识别网址已失效~')
+        exit()
 
 def order():
     '''订票函数'''

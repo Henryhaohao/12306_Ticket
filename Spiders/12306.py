@@ -13,7 +13,9 @@ from urllib import parse
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
+import urllib3
 
+urllib3.disable_warnings() #不显示警告信息
 ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
 
@@ -34,7 +36,7 @@ class Leftquery(object):
 
     def station_name(self, station):
         '''获取车站简拼'''
-        html = requests.get(self.station_url).text
+        html = requests.get(self.station_url, verify=False).text
         result = html.split('@')[1:]
         dict = {}
         for i in result:
@@ -47,10 +49,10 @@ class Leftquery(object):
         '''余票查询'''
         fromstation = self.station_name(from_station)
         tostation = self.station_name(to_station)
-        url = 'https://kyfw.12306.cn/otn/leftTicket/queryA?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
+        url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
         try:
-            html = requests.get(url, headers=self.headers).json()
+            html = requests.get(url, headers=self.headers, verify=False).json()
             result = html['data']['result']
             if result == []:
                 print('很抱歉,没有查到符合当前条件的列车!')
@@ -683,7 +685,7 @@ def order():
     print('            5  |  6  |  7  |  8 ')
     print('     --------------------------------------- ')
     print(' =============================================================== ')
-    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开):')
+    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
     login.captcha(answer_num)
     login.login()
     # 提交订单
@@ -721,7 +723,7 @@ def cancelorder():
     print('            5  |  6  |  7  |  8 ')
     print('     --------------------------------------- ')
     print(' =============================================================== ')
-    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开):')
+    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例如:3,6,8):')
     cancelorder.captcha(answer_num)
     cancelorder.login()
     # 查询订单
@@ -743,7 +745,7 @@ def cancelticket():
     print('            5  |  6  |  7  |  8 ')
     print('     --------------------------------------- ')
     print(' =============================================================== ')
-    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开):')
+    answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:2,3):')
     cancelticket.captcha(answer_num)
     cancelticket.login()
     # 查询历史订单
@@ -771,18 +773,21 @@ def select():
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
         order()
+        exit()
     if func == '2':
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
         cancelorder()
+        exit()
     if func == '3':
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
         order()
+        exit()
     else:
         print('输入有误,请重新输入...')
         print('*' * 69)
-        cancelticket()
+        select()
 
 
 if __name__ == '__main__':
