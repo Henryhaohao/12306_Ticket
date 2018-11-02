@@ -276,11 +276,11 @@ class Order(object):
         print('train_location值:' + train_location)
         print('purpose_codes值:' + purpose_codes)
         price_list = re.findall(r"'leftDetails':(.*?),'leftTicketStr", html_token)[0]
-        price = price_list[1:-1].replace('\'', '').split(',')
+        # price = price_list[1:-1].replace('\'', '').split(',')
         print('票价:')
-        for i in price:
-            p = i.encode('latin-1').decode('unicode_escape')
-            print(p + ' ', end='')
+        for i in eval(price_list):
+            # p = i.encode('latin-1').decode('unicode_escape')
+            print(i + ' | ', end='')
         return train_date, train_no, stationTrainCode, fromStationTelecode, toStationTelecode, leftTicket, purpose_codes, train_location, token, key_check_isChange
 
     def passengers(self, token):
@@ -296,7 +296,7 @@ class Order(object):
         print('\n')
         print('乘客信息列表:')
         for i in passengers:
-            print(str(int(i['index_id']) + 1) + '号:' + i['passenger_name'] + ' ', end='')
+            print(str(int(i['index_id']) + 1) + '号:' + i['passenger_name'] + ' | ', end='')
         print('\n')
         return passengers
 
