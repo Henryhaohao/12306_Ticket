@@ -49,7 +49,7 @@ class Leftquery(object):
         '''余票查询'''
         fromstation = self.station_name(from_station)
         tostation = self.station_name(to_station)
-        url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
+        url = 'https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
         try:
             html = requests.get(url, headers=self.headers, verify=False).json()
