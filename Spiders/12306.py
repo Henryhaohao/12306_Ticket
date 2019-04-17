@@ -4,11 +4,15 @@ __author__ = 'Henry'
 
 
 '''
-12306-余票查询+订票
+12306-余票查询+订票+退票
+
+20190416登录更新:
+    必须cookie加上RAIL_DEVICEID(https://kyfw.12306.cn/otn/HttpZF/logdevice这个借口返回的,写成定值即可,2030年过期)
+    要不然会登录失败,返回"网络可能存在问题，请您重试一下！",会跳转到https://www.12306.cn/mormhweb/logFiles/error.html
 '''
 
 
-import requests, re, time, ssl
+import requests, re, time, ssl, urllib
 from urllib import parse
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -18,6 +22,7 @@ import urllib3
 urllib3.disable_warnings() #不显示警告信息
 ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
+req.cookies['RAIL_DEVICEID'] = 'g9qXFFIFQ4jPKuxX6YTC38yc0xdYE2QfbPKdtS8HpYXgY9yKKaQGR2eOG-Kx67d6Hp-keCyhUqjc7pokitcskwj5X9i72soSkvlc4qFQ2hf-abUpuwvcHjww4n_kxYXe9tFbCAV_1VFtCQS64hAyI0ycCQgLbQDW'
 
 
 class Leftquery(object):
@@ -51,6 +56,7 @@ class Leftquery(object):
         tostation = self.station_name(to_station)
         url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
+        # 学生票查询: url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=0X00'.format(date, fromstation, tostation)
         try:
             html = requests.get(url, headers=self.headers, verify=False).json()
             result = html['data']['result']
@@ -102,8 +108,12 @@ class Login(object):
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
         self.headers = {
+            # 'Accept': 'application/json, text/javascript, */*; q=0.01',
+            # 'Accept-Encoding': 'gzip, deflate, br',
+            # 'Accept-Language': 'zh-CN,zh;q=0.9',
             'Host': 'kyfw.12306.cn',
-            'Referer': 'https://kyfw.12306.cn/otn/login/init',
+            # 'Referer': 'https://kyfw.12306.cn/otn/login/init',
+            'Referer': 'https://kyfw.12306.cn/otn/resources/login.html',
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
         }
 
@@ -138,10 +148,11 @@ class Login(object):
         form_check = {
             'answer': answer,
             'login_site': 'E',
-            'rand': 'sjrand'
+            'rand': 'sjrand',
+            '_': str(int(time.time() * 1000))
         }
         global req
-        html_check = req.post(self.url_check, data=form_check, headers=self.headers).json()
+        html_check = req.get(self.url_check, params=form_check, headers=self.headers).json()
         print(html_check)
         if html_check['result_code'] == '4':
             print('验证码校验成功!')
@@ -149,16 +160,38 @@ class Login(object):
             print('验证码校验失败!')
             exit()
 
-    def login(self):
+    def login(self, answer_num):
         '''登录账号'''
+        answer_sp = answer_num.split(',')
+        answer_list = []
+        an = {'1': (31, 35), '2': (116, 46), '3': (191, 24), '4': (243, 50), '5': (22, 114), '6': (117, 94),
+              '7': (167, 120), '8': (251, 105)}
+        for i in answer_sp:
+            for j in an.keys():
+                if i == j:
+                    answer_list.append(an[j][0])
+                    answer_list.append(',')
+                    answer_list.append(an[j][1])
+                    answer_list.append(',')
+        s = ''
+        for i in answer_list:
+            s += str(i)
+        answer = s[:-1]
         form_login = {
             'username': self.username,
             'password': self.password,
-            'appid': 'otn'
+            'appid': 'otn',
+            'answer': answer
         }
+        print(form_login)
         global req
+        # self.headers['Content-Length'] = str(len(urllib.parse.urlencode(form_login)))
+        # 20190416更新-必须cookie加上RAIL_DEVICEID(https://kyfw.12306.cn/otn/HttpZF/logdevice这个借口返回的,写成定值即可,2030年过期)
+        # 要不然会登录失败,返回"网络可能存在问题，请您重试一下！",会跳转到https://www.12306.cn/mormhweb/logFiles/error.html
+        # req.cookies['RAIL_DEVICEID'] = 'g9qXFFIFQ4jPKuxX6YTC38yc0xdYE2QfbPKdtS8HpYXgY9yKKaQGR2eOG-Kx67d6Hp-keCyhUqjc7pokitcskwj5X9i72soSkvlc4qFQ2hf-abUpuwvcHjww4n_kxYXe9tFbCAV_1VFtCQS64hAyI0ycCQgLbQDW'
         html_login = req.post(self.url_login, data=form_login, headers=self.headers).json()
         print(html_login)
+        # print(html_login['headers']['Content-Length'])
         if html_login['result_code'] == 0:
             print('恭喜您,登录成功!')
         else:
@@ -172,6 +205,7 @@ class Order(object):
     def __init__(self):
         self.url_uam = 'https://kyfw.12306.cn/passport/web/auth/uamtk'
         self.url_uamclient = 'https://kyfw.12306.cn/otn/uamauthclient'
+        self.url_checkUser = 'https://kyfw.12306.cn/otn/login/checkUser'
         self.url_order = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
         self.url_token = 'https://kyfw.12306.cn/otn/confirmPassenger/initDc'
         self.url_pass = 'https://kyfw.12306.cn/otn/confirmPassenger/getPassengerDTOs'
@@ -280,7 +314,8 @@ class Order(object):
         print('票价:')
         for i in eval(price_list):
             # p = i.encode('latin-1').decode('unicode_escape')
-            print(i + ' | ', end='')
+            print(i.replace('一等卧','软卧').replace('二等卧','硬卧') + ' | ', end='')
+            # print(i + ' | ', end='')
         return train_date, train_no, stationTrainCode, fromStationTelecode, toStationTelecode, leftTicket, purpose_codes, train_location, token, key_check_isChange
 
     def passengers(self, token):
@@ -667,9 +702,12 @@ class Cancelticket(Login, Order):
 def order():
     '''订票函数'''
     # 用户输入购票信息:
-    from_station = input('请输入您要购票的出发地(例:北京):')
-    to_station = input('请输入您要购票的目的地(例:上海):')
-    date = input('请输入您要购票的乘车日期(例:2018-03-06):')
+    # from_station = input('请输入您要购票的出发地(例:北京):')
+    from_station = '北京'
+    # to_station = input('请输入您要购票的目的地(例:上海):')
+    to_station = '上海'
+    # date = input('请输入您要购票的乘车日期(例:2019-03-06):')
+    date = '2019-05-15'
     # 余票查询
     query = Leftquery()
     result = query.query(from_station, to_station, date)
@@ -687,7 +725,7 @@ def order():
     print(' =============================================================== ')
     answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:1,2):')
     login.captcha(answer_num)
-    login.login()
+    login.login(answer_num)
     # 提交订单
     order = Order()
     order.auth()
@@ -725,7 +763,7 @@ def cancelorder():
     print(' =============================================================== ')
     answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例如:3,6,8):')
     cancelorder.captcha(answer_num)
-    cancelorder.login()
+    cancelorder.login(answer_num)
     # 查询订单
     cancelorder.auth()
     # 取消订单
@@ -747,7 +785,7 @@ def cancelticket():
     print(' =============================================================== ')
     answer_num = input('请填入验证码(序号为1~8,中间以逗号隔开,例:2,3):')
     cancelticket.captcha(answer_num)
-    cancelticket.login()
+    cancelticket.login(answer_num)
     # 查询历史订单
     cancelticket.auth()
     querytype = input('请选择查询方式(1:按订票日期查询 2:按乘车日期查询):')
@@ -770,8 +808,10 @@ def select():
     func = input('请输入您要操作的选项(例:1):')
     global username, password
     if func == '1':
-        username = input('请输入您的12306账号名称:')
-        password = input('请输入您的12306账号密码:')
+        # username = input('请输入您的12306账号名称:')
+        username = '13667426758'
+        # password = input('请输入您的12306账号密码:')
+        password = 'l19701217'
         order()
         exit()
     if func == '2':
@@ -782,7 +822,7 @@ def select():
     if func == '3':
         username = input('请输入您的12306账号名称:')
         password = input('请输入您的12306账号密码:')
-        order()
+        cancelticket()
         exit()
     else:
         print('输入有误,请重新输入...')
