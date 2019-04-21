@@ -808,10 +808,8 @@ def select():
     func = input('请输入您要操作的选项(例:1):')
     global username, password
     if func == '1':
-        # username = input('请输入您的12306账号名称:')
-        username = '13667426758'
-        # password = input('请输入您的12306账号密码:')
-        password = 'l19701217'
+        username = input('请输入您的12306账号名称:')
+        password = input('请输入您的12306账号密码:')
         order()
         exit()
     if func == '2':
