@@ -7,7 +7,7 @@ __author__ = 'Henry'
 12306-余票查询+订票+退票
 
 20190416登录更新:
-    必须cookie加上RAIL_DEVICEID(https://kyfw.12306.cn/otn/HttpZF/logdevice这个借口返回的,写成定值即可,2030年过期)
+    必须cookie加上RAIL_DEVICEID(https://kyfw.12306.cn/otn/HttpZF/logdevice这个接口返回的)
     要不然会登录失败,返回"网络可能存在问题，请您重试一下！",会跳转到https://www.12306.cn/mormhweb/logFiles/error.html
 '''
 
@@ -22,7 +22,9 @@ import urllib3
 urllib3.disable_warnings() #不显示警告信息
 ssl._create_default_https_context = ssl._create_unverified_context
 req = requests.Session()
-req.cookies['RAIL_DEVICEID'] = 'g9qXFFIFQ4jPKuxX6YTC38yc0xdYE2QfbPKdtS8HpYXgY9yKKaQGR2eOG-Kx67d6Hp-keCyhUqjc7pokitcskwj5X9i72soSkvlc4qFQ2hf-abUpuwvcHjww4n_kxYXe9tFbCAV_1VFtCQS64hAyI0ycCQgLbQDW'
+
+# 获取RAIL_DEVICEID写在登录之前get_rail_deviceid()函数
+# req.cookies['RAIL_DEVICEID'] = 'ng8GWpVBAs1dnOxtsAEnQ1EyfbEuCIGetci8OLRrXAtY_grSokW5WZb10aDdNS_Je4KbKlgf3fPtO4cZJGCox4ORGXGZ8Fhcq6TDWW1iuLlaU2kLccvL22V_HBd49idoCqL0dJEbfl3Plhhno73VZqQY5aKeAHHJ'
 
 
 class Leftquery(object):
@@ -107,6 +109,7 @@ class Login(object):
         self.url_pic = 'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&0.15905700266966694'
         self.url_check = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
         self.url_login = 'https://kyfw.12306.cn/passport/web/login'
+        self.url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=z0nwCFNNFy&hashCode=Sonomt4GXxQ8y5nP8OKANN4uqj_LKFPbEeGZQpQSQLc&FMQw=0&q4f3=zh-CN&VySQ=FGF9QEe67lYGavdZicwJH4vsu9jHLwS5&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&lEnu=3232235621&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/68.0.3440.106%20Safari/537.36&E3gR=6ffe6a32e9af788920458ef31ceafe4a&timestamp='
         self.headers = {
             # 'Accept': 'application/json, text/javascript, */*; q=0.01',
             # 'Accept-Encoding': 'gzip, deflate, br',
@@ -116,6 +119,13 @@ class Login(object):
             'Referer': 'https://kyfw.12306.cn/otn/resources/login.html',
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
         }
+
+    def get_rail_deviceid(self):
+        '''获取rail_deviceid'''
+        global req
+        html_rail_deviceid = req.get(self.url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
+        rail_deviceid = re.search(r'"dfp":"(.*?)"', html_rail_deviceid).group(1)
+        req.cookies['RAIL_DEVICEID'] = rail_deviceid
 
     def showimg(self):
         '''显示验证码图片'''
@@ -702,17 +712,18 @@ class Cancelticket(Login, Order):
 def order():
     '''订票函数'''
     # 用户输入购票信息:
-    # from_station = input('请输入您要购票的出发地(例:北京):')
-    from_station = '北京'
-    # to_station = input('请输入您要购票的目的地(例:上海):')
-    to_station = '上海'
-    # date = input('请输入您要购票的乘车日期(例:2019-03-06):')
-    date = '2019-05-15'
+    from_station = input('请输入您要购票的出发地(例:北京):')
+    # from_station = '北京'
+    to_station = input('请输入您要购票的目的地(例:上海):')
+    # to_station = '上海'
+    date = input('请输入您要购票的乘车日期(例:2019-03-06):')
+    # date = '2019-05-15'
     # 余票查询
     query = Leftquery()
     result = query.query(from_station, to_station, date)
     # 开始订票
     login = Login()
+    login.get_rail_deviceid()
     login.showimg()
     # 填写验证码
     print('  =============================================================== ')
@@ -751,6 +762,7 @@ def order():
 def cancelorder():
     '''取消订单函数'''
     cancelorder = Cancelorder()
+    cancelorder.get_rail_deviceid()
     cancelorder.showimg()
     # 填写验证码
     print('  =============================================================== ')
@@ -773,6 +785,7 @@ def cancelorder():
 def cancelticket():
     '''退票函数'''
     cancelticket = Cancelticket()
+    cancelticket.get_rail_deviceid()
     cancelticket.showimg()
     # 填写验证码
     print('  =============================================================== ')
@@ -789,9 +802,9 @@ def cancelticket():
     # 查询历史订单
     cancelticket.auth()
     querytype = input('请选择查询方式(1:按订票日期查询 2:按乘车日期查询):')
-    startdate = input('请输入查询起始日期(如:2018-06-16):')
-    enddate = input('请输入查询最终日期(如:2018-06-16):')
-    train_info = input('请输入乘客姓名(例:小明)或车次号(例:K1561)或订单号(例:EF159626),也可以不填跳过:')
+    startdate = input('请输入查询起始日期(如:2019-01-16):')
+    enddate = input('请输入查询最终日期(如:2019-01-16):')
+    train_info = input('请输入乘客姓名(例:小明)或车次号(例:K1561)或订单号(例:EF159626),也可以不填跳过(直接按回车键):')
     queryinfo = cancelticket.queryorder(querytype, startdate, enddate, train_info)
     # 用户选择要退哪张票
     order = input('请选择要退票的订单编号(例:1):')
