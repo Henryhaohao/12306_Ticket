@@ -126,8 +126,8 @@ class Login(object):
         html = requests.get('https://kyfw.12306.cn/otn/HttpZF/GetJS', headers=self.headers).text
         algID = re.search(r'algID\\x3d(.*?)\\x', html).group(1)
         # print('algID:' + algID)
-        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=g31sieVa_C2qFYjQo2GgvOscy68BGA2Bg86hZT3aWm8&FMQw=1&q4f3=zh-CN&VySQ=FGEdmmK0Wj7y9zUpl_D3rF9LHy5L5269&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&lEnu=3232235621&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='.format(algID)
-        html_rail_deviceid = req.get(self.url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
+        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=8Hm1TtV-D7GmJS4d9P59JkCu26BFA236x3aA9c0sdkM&FMQw=1&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='.format(algID)
+        html_rail_deviceid = req.get(url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
         rail_deviceid = re.search(r'"dfp":"(.*?)"', html_rail_deviceid).group(1)
         req.cookies['RAIL_DEVICEID'] = rail_deviceid
 
