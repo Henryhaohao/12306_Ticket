@@ -5,10 +5,12 @@ __author__ = 'Henry'
 
 '''
 12306-余票查询+订票+退票
-
 20190416登录更新:
     必须cookie加上RAIL_DEVICEID(https://kyfw.12306.cn/otn/HttpZF/logdevice这个接口返回的)
     要不然会登录失败,返回"网络可能存在问题，请您重试一下！",会跳转到https://www.12306.cn/mormhweb/logFiles/error.html
+    
+20190721更新:
+    选择乘客信息查询余票时多提交了一个allEncStr字段
 '''
 
 
@@ -126,7 +128,7 @@ class Login(object):
         html = requests.get('https://kyfw.12306.cn/otn/HttpZF/GetJS', headers=self.headers).text
         algID = re.search(r'algID\\x3d(.*?)\\x', html).group(1)
         # print('algID:' + algID)
-        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=RRMtFCfi7_qn-mkm7lywrgh8Ihzxz5qUVw_EbJkYWuE&FMQw=1&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='.format(algID)
+        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=HkgTovWdBm33oYgEr-h-a-98BYEiPmaa9mZnOANKB9E&FMQw=1&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='.format(algID)
         html_rail_deviceid = req.get(url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
         rail_deviceid = re.search(r'"dfp":"(.*?)"', html_rail_deviceid).group(1)
         req.cookies['RAIL_DEVICEID'] = rail_deviceid
@@ -363,37 +365,24 @@ class Order(object):
             pass_id = info['passenger_id_no']  # 身份证号
             pass_phone = info['mobile_no']  # 手机号码
             pass_type = info['passenger_type']  # 证件类型
+            allEncStr = info['allEncStr']  # 加密字符串
             dict = {
                 'choose_type': choose_type,
                 'pass_name': pass_name,
                 'pass_id': pass_id,
                 'pass_phone': pass_phone,
-                'pass_type': pass_type
+                'pass_type': pass_type,
+                'allEncStr': allEncStr
             }
             pass_dict.append(dict)
 
-        num = 0
-        TicketStr_list = []
+        passengerTicketStr = ''
         for i in pass_dict:
-            if pass_num == 1:
-                TicketStr = i['choose_type'] + ',0,1,' + i['pass_name'] + ',' + i['pass_type'] + ',' + i[
-                    'pass_id'] + ',' + i['pass_phone'] + ',N'
-                TicketStr_list.append(TicketStr)
-            elif num == 0:
-                TicketStr = i['choose_type'] + ',0,1,' + i['pass_name'] + ',' + i['pass_type'] + ',' + i[
-                    'pass_id'] + ',' + i['pass_phone'] + ','
-                TicketStr_list.append(TicketStr)
-            elif num == pass_num - 1:
-                TicketStr = 'N_' + i['choose_type'] + ',0,1,' + i['pass_name'] + ',' + i['pass_type'] + ',' + i[
-                    'pass_id'] + ',' + i['pass_phone'] + ',N'
-                TicketStr_list.append(TicketStr)
-            else:
-                TicketStr = 'N_' + i['choose_type'] + ',0,1,' + i['pass_name'] + ',' + i['pass_type'] + ',' + i[
-                    'pass_id'] + ',' + i['pass_phone'] + ','
-                TicketStr_list.append(TicketStr)
-            num += 1
+            TicketStr = i['choose_type'] + ',0,1,' + i['pass_name'] + ',' + i['pass_type'] + ',' + i[
+                'pass_id'] + ',' + i['pass_phone'] + ',N,' + i['allEncStr']
+            passengerTicketStr += TicketStr + '_'
 
-        passengerTicketStr = ''.join(TicketStr_list)
+        passengerTicketStr = passengerTicketStr[:-1]
         print(passengerTicketStr)
 
         num = 0
