@@ -58,7 +58,7 @@ class Leftquery(object):
         '''余票查询'''
         fromstation = self.station_name(from_station)
         tostation = self.station_name(to_station)
-        url = 'https://kyfw.12306.cn/otn/leftTicket/queryT?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
+        url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=ADULT'.format(
             date, fromstation, tostation)
         # 学生票查询: url = 'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={}&leftTicketDTO.from_station={}&leftTicketDTO.to_station={}&purpose_codes=0X00'.format(date, fromstation, tostation)
         try:
@@ -128,7 +128,8 @@ class Login(object):
         html = requests.get('https://kyfw.12306.cn/otn/HttpZF/GetJS', headers=self.headers).text
         algID = re.search(r'algID\\x3d(.*?)\\x', html).group(1)
         # print('algID:' + algID)
-        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=mbgqAe2LcSdcFcWUHUufkHAkREnHY9IHgIWnZMZZWGY&FMQw=1&q4f3=zh-CN&VySQ=FGHpd000LdyBq9OSDlC5z_mApbGs15nG&VPIf=1&custID=133&VEek=unknown&dzuS=29.0%20r0&yD16=0&EOQP=f57fa883099df9e46e7ee35d22644d2b&jp76=7047dfdd1d9629c1fb64ef50f95be7ab&hAqN=Win32&platform=WEB&ks0Q=6f0fab7b40ee4a476b4b3ade06fe9065&TeRS=1080x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/63.0.3239.132%20Safari/537.36&E3gR=fd7a8adb89dd5bf3a55038ad1adc5d35&timestamp='.format(algID)
+        url_rail_deviceid = 'https://kyfw.12306.cn/otn/HttpZF/logdevice?algID={}&hashCode=lcDbed2Mzz_ujxMm4wqJJGdtpwewNfaD9ls9fevDi7s&FMQw=1&q4f3=zh-CN&VySQ=FGHsTPLNUtnxKqG7cFTyIU0TP2MHNCET&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=4902a61a235fbb59700072139347967d&jp76=22c403d29cd09c89fdb5ff4f63770421&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1112x2048&tOHY=24xx1152x2048&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew=Mozilla/5.0%20(Windows%20NT%2010.0;%20Win64;%20x64)%20AppleWebKit/537.36%20(KHTML,%20like%20Gecko)%20Chrome/78.0.3904.108%20Safari/537.36&E3gR=193e1e48dda80e6170a08ad4ab99686d&timestamp='.format(
+            algID)
         html_rail_deviceid = req.get(url_rail_deviceid+ str(int(time.time()*1000)),headers=self.headers).text
         rail_deviceid = re.search(r'"dfp":"(.*?)"', html_rail_deviceid).group(1)
         req.cookies['RAIL_DEVICEID'] = rail_deviceid
